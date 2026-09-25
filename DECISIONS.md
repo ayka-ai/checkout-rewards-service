@@ -317,4 +317,4 @@ serializes the checkout transactions across processes. That does not scale beyon
 
 ## Time spent
 
-Approximately **5 hours**, split across two days (~2.5 hours each).
+About **1 hour** of building in a single session on Sep 25 (visible in the commit history), working with an AI coding assistant, plus additional time reviewing the code, running the tests on Windows, and preparing to explain every decision. The build came in well under the 4–6 hour timebox because the AI drafted most of the code; my time went mainly into the design choices, verification and review.
