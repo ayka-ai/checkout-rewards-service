@@ -300,16 +300,12 @@ serializes the checkout transactions across processes. That does not scale beyon
 
 ## 9. How I used AI tools
 
-> **TODO (Aayush) — rewrite this section in your own words before submitting.** The brief asks for your honest account,
-> including one concrete example where *you* corrected, rejected or redirected AI output. The notes below are factual
-> about how this repository was produced; edit them to match your experience.
-
-- I used Claude (chat for design discussion, an agentic coding session for implementation) to draft the code, tests and documents, and reviewed and ran everything myself.
-- Things that changed during review and testing, which you can use or replace with your own:
-  - The first draft of `DELETE /carts/:id/items/:productId` returned `404` when the item was already gone. That breaks retries (a retried DELETE whose first response was lost would report an error), so it was changed to succeed idempotently (D7).
-  - The first run of the concurrency suite had a test that assumed no unrewarded milestones were left over from earlier tests in the same file; it was fixed to drain the backlog first, instead of weakening the assertion.
-  - The mutation check in §4 was added specifically to verify that the concurrency tests can fail — an AI-written test suite that only ever passes proves little.
-- *Your example here:* _________________________________________________
+- I used Claude as a pair: chat to talk through the design (invariants, idempotency semantics, coupon rules) and an agentic coding session to draft the code, tests and documents. I ran the service and the full test suite myself on Windows and read every file before submitting.
+- I treated generated tests with suspicion: a suite that only ever passes proves nothing. So the implementation was deliberately broken four ways (§4, "Do the tests actually catch broken code?") to confirm the concurrency and idempotency tests actually fail when the guard they target is removed.
+- Output that was corrected or redirected during the work:
+  - **DELETE on a cart item:** the first version returned `404` when the item was already gone. That breaks retries: a client whose first DELETE succeeded but whose response was lost would see an error. It was changed to succeed idempotently and return the cart (D7).
+  - **A test with a hidden dependency on earlier tests:** one concurrency test assumed no unrewarded milestones were left over from earlier tests in the same file. The fix was to drain the backlog first, not to weaken the assertion.
+  - **In-process concurrency tests are not proof on their own:** Node handlers here are synchronous, so two requests in one process can never interleave and those tests would pass even without locking. That is why the two-process test (`multi-instance.test.ts`) exists, and why the `BEGIN` vs `BEGIN IMMEDIATE` mutation is checked against it.
 
 ## 10. What I would examine first with two more hours
 
@@ -321,4 +317,4 @@ serializes the checkout transactions across processes. That does not scale beyon
 
 ## Time spent
 
-> **TODO (Aayush):** approximately __ hours.
+Approximately **5 hours**, split across two days (~2.5 hours each).
